@@ -1,6 +1,6 @@
 #include <vtkChartXY.h>
+#include <vtkContext2D.h>
 #include <vtkContextScene.h>
-#include <vtkContextView.h>
 #include <vtkFloatArray.h>
 #include <vtkPen.h>
 #include <vtkPlot.h>
@@ -37,7 +37,7 @@ int main(int, char *[]) {
   }
 
   // Set up the view
-  vtkSmartPointer<vtkContextView> view = vtkSmartPointer<vtkContextView>::New();
+  vtkSmartPointer<vtkContext2D> view = vtkSmartPointer<vtkContext2D>::New();
   view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
 
   // Add multiple line plots, setting the colors etc

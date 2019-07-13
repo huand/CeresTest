@@ -2,7 +2,7 @@
 
 #include <vtkChartXY.h>
 #include <vtkContextScene.h>
-#include <vtkContextView.h>
+//#include <vtkContextView.h>
 #include <vtkDoubleArray.h>
 #include <vtkPen.h>
 #include <vtkPlot.h>
