@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
-set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD 17)
 project (myCeres)
 #set(CMAKE_BUILD_TYPE Debug)
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+#list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(glog)
 find_package(Ceres REQUIRED)
@@ -30,9 +30,6 @@ target_link_libraries(helloworld glog ceres)
 
 add_executable(powell powell.cc)
 target_link_libraries(powell ${GLOG_LIBRARIES} ${CERES_LIBRARIES} ${GFLAGS_LIBRARIES})
-
-add_executable(powell2 powell2.cc)
-target_link_libraries(powell2 ${GLOG_LIBRARIES} ${CERES_LIBRARIES} ${GFLAGS_LIBRARIES})
 
 add_executable(curvefitting curvefitting.cc)
 target_link_libraries(curvefitting
