@@ -1,6 +1,8 @@
+// Copyright 2019 Hubert andre
 #include "ceres/ceres.h"
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <vector>
 
 struct XY {

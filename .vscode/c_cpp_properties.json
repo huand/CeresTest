@@ -13,7 +13,6 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "${default}",
-            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "configurationProvider": "vector-of-bool.cmake-tools"
         }
     ],
