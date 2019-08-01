@@ -37,7 +37,6 @@ ${GLOG_LIBRARIES}
 ${CERES_LIBRARIES}
 ${GFLAGS_LIBRARIES}
 ${OpenCV_LIBRARIES}
-${VTK_LIBRARIES}
 )
 vtk_module_autoinit(
   TARGETS curvefitting
