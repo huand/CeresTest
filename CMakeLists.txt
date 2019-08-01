@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
 set (CMAKE_CXX_STANDARD 17)
 project (myCeres)
-<<<<<<< HEAD
-#set(CMAKE_BUILD_TYPE Debug)
-#list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-=======
 set(CMAKE_BUILD_TYPE Debug)
->>>>>>> ff2a787a34a23f7f47db7049f0729acf3cf7db95
 find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 find_package(glog REQUIRED)
 find_package(Gflags REQUIRED)
