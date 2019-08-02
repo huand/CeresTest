@@ -8,10 +8,14 @@
 struct Projector {
   Projector(double x, double y) : px(x), py(y){};
   template <typename T>
-  bool operator()(const T* const xp, const T* const xc, const T* const q,
-                  const T* const f, const T* const k, T* res) const {
+  bool operator()(const T* const xp,
+                  const T* const xc,
+                  const T* const rot,
+                  const T* const f,
+                  const T* const k,
+                  T* res) const {
     T r[3];
-    ceres::AngleAxisRotatePoint(q, xp, r);
+    ceres::AngleAxisRotatePoint(rot, xp, r);
     r[0] += xc[0];
     r[1] += xc[1];
     r[2] += xc[2];
@@ -28,106 +32,124 @@ struct Projector {
   double px;
   double py;
 };
-struct Pixel {
-  double x;
-  double y;
+struct Projector0 {
+  // Projector0(double x, double y) : px(x), py(y){};
+  template <typename T>
+  bool operator()(const T* const xp,
+                  const T* const f,
+                  const T* const k,
+                  T* res) const {
+    T r[3];
+    T Rot[3] = {(T)rot[0], (T)rot[1], (T)rot[2]};
+    ceres::AngleAxisRotatePoint(Rot, xp, r);
+    r[0] += xc[0];
+    r[1] += xc[1];
+    r[2] += xc[2];
+    T dx = -r[0] / r[2];
+    T dy = -r[1] / r[2];
+    T R2 = pow(dx, 2) + pow(dy, 2);
+    T distortion = T(1.0) + R2 * k[0] + k[1] * pow(R2, 2);
+    res[0] = dx * f[0] * distortion - pix[0];
+    res[1] = dy * f[0] * distortion - pix[1];
+    return true;
+  };
+  // private:
+  double pix[2];
+  double xc[3];
+  double rot[3];
 };
 
 struct DataRow {
   int keyframe;
   int point;
-  Pixel pixel;
+  double pixel[2];
 };
 
+struct Keyframe {
+  double rot[3];
+  double pos[3];
+  double focal;
+  double distortion[2];
+};
 struct Point {
-  Point(double d0, double d1, double d2) {
-    x[0] = d0;
-    x[1] = d1;
-    x[2] = d2;
-  }
-  double x[3] = {1, 1, 1};
-};
-
-struct Rot {
-  Rot(double d0, double d1, double d2) {
-    r[0] = d0;
-    r[1] = d1;
-    r[2] = d2;
-  }
-  double r[3];
-};
-
-struct Distortion {
-  Distortion(double k1, double k2) {
-    k[0] = k1;
-    k[1] = k2;
-  };
-  double k[2];
+  double x[3];
 };
 
 int main(int argc, char const* argv[]) {
   google::InitGoogleLogging(argv[0]);
   std::vector<DataRow> data;
   int maxframe, maxpoint, maxobs;
-
   std::ifstream in(
-      "/home/home/Documents/datasets/bal/ladybug/problem-49-7776-pre.txt");
+      "/home/adlink/Documents/datasets/bal/ladybug/problem-138-19878-pre.txt");
   in >> maxframe >> maxpoint >> maxobs;
-  std::vector<Point> point;  //(maxpoint, Point{});
-  std::vector<Rot> rot;      //(maxframe, Rot{});
-  std::vector<Point> cam;    //(maxobs, Point{});
-  std::vector<double> focal;
-  std::vector<Distortion> distortion;
-  int keyframe, pt;
+  std::vector<Keyframe> keyframes;
+  int kf, pt;
   double x, y;
-  Pixel pixel;
   for (int k = 0; k < maxobs; k++) {
-    in >> keyframe >> pt >> x >> y;
-    data.push_back(DataRow{keyframe, pt, Pixel{x, y}});
+    in >> kf >> pt >> x >> y;
+    data.push_back(DataRow{kf, pt, {x, y}});
   }
-  for (int k = 0; k < 9 * maxframe; k++) {
-    double d1, d2, d3;
-    in >> d1 >> d2 >> d3;
-    rot.push_back(Rot{d1, d2, d3});
-    in >> d1 >> d2 >> d3;
-    cam.push_back(Point{d1, d2, d3});
-    in >> d1;
-    focal.push_back(d1);
-    in >> d1 >> d2;
-    distortion.push_back(Distortion{d1, d2});
+  for (int k = 0; k < maxframe; k++) {
+    double r1, r2, r3, p1, p2, p3, f, k1, k2;
+    in >> r1 >> r2 >> r3;
+    in >> p1 >> p2 >> p3;
+    in >> f >> k1 >> k2;
+    keyframes.push_back(Keyframe{{r1, r2, r3}, {p1, p2, p3}, f, {k1, k2}});
   }
+  std::vector<Point> points;
   for (int i = 0; i < maxpoint; i++) {
-    double d1, d2, d3;
-    in >> d1 >> d2 >> d3;
-    point.push_back(Point{d1, d2, d3});
+    double px, py, pz;
+    in >> px >> py >> pz;
+    points.push_back(Point{{px, py, pz}});
+  }
+  double p0[3] = {keyframes[0].pos[0], keyframes[0].pos[1],
+                  keyframes[0].pos[2]};
+  double r0[3] = {keyframes[0].rot[0], keyframes[0].rot[1],
+                  keyframes[0].rot[2]};
+  // Projector0 ppp = Projector0{{123, 321}, {1., 2., 3.}, {11., 22., 33.}};
+  ceres::Problem problem;
+  ceres::Solver::Summary summary;
+  for (int i = 0; i < data.size(); i++) {
+    int ic = data[i].keyframe;
+    int ip = data[i].point;
+    double res[2];
+    ceres::CostFunction* costfuntion;
+    if (ic != 0) {
+      costfuntion =
+          new ceres::AutoDiffCostFunction<Projector, 2, 3, 3, 3, 1, 2>(
+              new Projector{data[i].pixel[0], data[i].pixel[1]});
+      problem.AddResidualBlock(costfuntion, NULL, points[ip].x,
+                               keyframes[ic].pos, keyframes[ic].rot,
+                               &keyframes[ic].focal, keyframes[ic].distortion);
+    } else {
+      costfuntion = new ceres::AutoDiffCostFunction<Projector0, 2, 3, 1, 2>(
+          new Projector0{data[i].pixel[0],
+                         data[i].pixel[1],
+                         {p0[0], p0[1], p0[2]},
+                         {r0[0], r0[1], r0[2]}});
+      problem.AddResidualBlock(costfuntion, NULL, points[ip].x,
+                               &keyframes[ic].focal, keyframes[ic].distortion);
+      // costfuntion =
+      //     new ceres::AutoDiffCostFunction<Projector, 2, 3, 3, 3, 1, 2>(
+      //         new Projector{data[i].pixel[0], data[i].pixel[1]});
+      // problem.AddResidualBlock(costfuntion, NULL, points[ip].x,
+      //                          keyframes[ic].pos, keyframes[ic].rot,
+      //                          &keyframes[ic].focal,
+      //                          keyframes[ic].distortion);
+    }
   }
 
   ceres::Solver::Options options;
   options.max_num_iterations = 2000;
-  ceres::Problem problem;
-  ceres::Solver::Summary summary;
-  double f = 500;
-  double k[] = {0, 0};
-  for (int i = 0; i < data.size(); i++) {
-    ceres::CostFunction* costfuntion =
-        new ceres::AutoDiffCostFunction<Projector, 2, 3, 3, 3, 1, 2>(
-            new Projector{data[i].pixel.x, data[i].pixel.y});
-    int ip = data[i].point;
-    int ic = data[i].keyframe;
-    double res[2];
-    problem.AddResidualBlock(costfuntion, NULL, point[ip].x, cam[ic].x,
-                             rot[ic].r, &focal[ic], distortion[ic].k);
-  }
-
   options.minimizer_progress_to_stdout = true;
+  options.linear_solver_type = ceres::DENSE_SCHUR;
   ceres::Solve(options, &problem, &summary);
   std::cout << summary.FullReport() << std::endl;
 
   std::ofstream out("xyz.csv");
-  for (int i = 0; i < data.size(); i++) {
-    out << point[i].x[0] << "\t" << point[i].x[1] << "\t" << point[i].x[2]
+  for (int i = 0; i < points.size(); i++) {
+    out << points[i].x[0] << "\t" << points[i].x[1] << "\t" << points[i].x[2]
         << '\n';
   }
-  std::cout << f << std::endl;
   return 0;
 }
