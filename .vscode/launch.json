@@ -5,6 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "(gdb) simplebaref",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/BundleAdjSimpleRef",
+            "args": [
+                "/home/home/Documents/datasets/bal/ladybug/problem-49-7776-pre.txt"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
             "name": "(gdb) BA",
             "type": "cppdbg",
             "request": "launch",

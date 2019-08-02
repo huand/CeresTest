@@ -23,3 +23,7 @@ ${OpenCV_LIBRARIES}
 
 add_executable(BundleAdjustment BundleAdjustment.cc)
 target_link_libraries(BundleAdjustment glog ceres)
+
+add_executable(BundleAdjSimpleRef BundleAdjSimpleRef.cc)
+target_link_libraries(BundleAdjSimpleRef glog ceres)
+
