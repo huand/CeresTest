@@ -3,7 +3,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 fig = pyplot.figure()
-xyz = np.genfromtxt("xyz.csv")
+xyz = np.genfromtxt("../data/xyz.csv")
 d = np.sum(xyz ** 2, axis=1)
 dmed = np.median(d)
 dok = d < 4 * dmed

@@ -10,6 +10,6 @@ c = 0.0543
 X = np.random.rand(n, 1) * (xmax - xmin) + xmin
 Y = np.exp(m * X + c)+np.random.randn(n, 1)*sigma
 XY = np.concatenate((X, Y), 1)
-np.savetxt("XY.csv", XY, delimiter=",")
+np.savetxt("../data/XY.csv", XY, delimiter=",")
 plt.scatter(X, Y)
 plt.show()

@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-xy = np.genfromtxt('XY.csv', delimiter=',')
-mc = np.genfromtxt('mc.csv', delimiter=',')
+xy = np.genfromtxt('../data/XY.csv', delimiter=',')
+mc = np.genfromtxt('../data/mc.csv', delimiter=',')
 m = mc[0]
 c = mc[1]
 data_x = xy[:, 0]
