@@ -27,3 +27,5 @@ target_link_libraries(BundleAdjustment glog ceres)
 add_executable(BundleAdjSimpleRef ceres/BundleAdjSimpleRef.cc)
 target_link_libraries(BundleAdjSimpleRef glog ceres)
 
+add_executable(circle ceres/circle.cc)
+target_link_libraries(circle glog ceres)
