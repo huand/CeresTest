@@ -51,7 +51,7 @@ int main(int argc, char const* argv[]) {
   ceres::Solver::Options options;
   ceres::Solver::Summary summary;
   ceres::Problem problem;
-  double radius = 20;
+  double radius = 1;
   double center[] = {0, 0, 0};
   double rodrigues[] = {0, 0, 0};
   /////////////////

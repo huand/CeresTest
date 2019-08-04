@@ -13,7 +13,7 @@ data = r*np.concatenate((np.cos(theta), np.sin(theta),
 circle = r*np.concatenate((np.cos(theta0), np.sin(theta0),
                            np.zeros((n, 1))), axis=1)
 # adding noise
-noise_level = r/7
+noise_level = r/2
 data += np.random.randn(n, 3) * noise_level
 
 # solid 3d transformation
@@ -24,7 +24,7 @@ Rtheta = np.array(((np.cos(theta), 0, np.sin(theta)),
 Rphi = np.array(
     ((1, 0, 0), (0, np.cos(phi), np.sin(phi)), (0, -np.sin(phi), np.cos(phi))))
 R = Rtheta.dot(Rphi)
-t = np.random.rand(3, 1) * r/2
+t = np.random.rand(3, 1) * r
 T01 = np.concatenate(
     (np.concatenate((R, np.zeros((1, 3)))), np.concatenate((t, np.ones((1, 1))))), axis=1)
 circle = np.concatenate((circle, np.ones((n, 1))), axis=1)
